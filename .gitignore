@@ -1,0 +1,38 @@
+#ignore for django
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+.venv
+
+#ignore for node
+node_modules
+npm-debug.log
+app.log
+
+# igonore for ui
+ui/logs
+ui/*.log
+ui/npm-debug.log*
+ui/yarn-debug.log*
+ui/yarn-error.log*
+ui/pnpm-debug.log*
+ui/lerna-debug.log*
+ui/
+ui/node_modules
+ui/dist
+ui/dist-ssr
+ui/*.local
+ui/
+ui/# Editor directories and files
+ui/.vscode/*
+ui/!.vscode/extensions.json
+ui/.idea
+ui/.DS_Store
+ui/*.suo
+ui/*.ntvs*
+ui/*.njsproj
+ui/*.sln
+ui/*.sw?
+ui/
+ui/.env
