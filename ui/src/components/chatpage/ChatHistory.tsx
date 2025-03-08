@@ -31,9 +31,9 @@ export default function ChatHistory({}: Props) {
   const searchFilter = () =>
     historyQuery.data?.filter((chat: chatHistoryType) =>
       (
-        chat.users[0]?.first_name?.toLowerCase() +
+        chat.members[0]?.userId?.toLowerCase() +
         " " +
-        chat.users[0]?.last_name?.toLowerCase()
+        chat.members[0]?.userId?.toLowerCase()
       ).includes((historySearchRef.current?.value ?? "").toLowerCase())
     );
 
@@ -96,7 +96,7 @@ export default function ChatHistory({}: Props) {
                 >
                   {onlineUserQuery.data.map((onlineUser: onlineUserType) => (
                     <SwiperSlide key={onlineUser?.user.id}>
-                      <Link to={`/main/${onlineUser.room.id}`}>
+                      <Link to={`/main/${onlineUser.room._id}`}>
                         <ProfilePic image={onlineUser?.user.profile} />
                       </Link>
                     </SwiperSlide>
@@ -132,24 +132,20 @@ export default function ChatHistory({}: Props) {
           <div className="flex flex-col grow basis-0 overflow-y-auto my-scroll">
             {historyUser.map((chat: chatHistoryType) => (
               <div
-                key={chat.room.id}
+                key={chat._id}
                 className={
                   "px-5 hover:bg-third cursor-pointer duration-300 py-4 rounded " +
-                  (roomId === chat.room.id ? "bg-third" : "")
+                  (roomId === chat.conversationId ? "bg-third" : "")
                 }
-                onClick={() => go(`/main/${chat.room.id}`)}
+                onClick={() => go(`/main/${chat.conversationId}`)}
               >
                 <RecentChat
-                  img={chat?.users[0]?.profile}
-                  name={
-                    chat?.users[0]?.first_name === undefined
-                      ? "Account Deleted"
-                      : chat?.users[0]?.first_name +
-                        " " +
-                        chat?.users[0]?.last_name
+                  img={
+                    "http://localhost:8000/media/profile/default_profile.jpg"
                   }
-                  msgQuantity={chat.quantity}
-                  message={chat.message}
+                  name={chat.name}
+                  msgQuantity={user?.id ? chat.members[user.id].unRead : 0}
+                  message={chat.lastMessage}
                   active={true}
                 />
               </div>

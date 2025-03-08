@@ -4,15 +4,16 @@ import { AxiosRequestConfig, AxiosResponse } from "axios";
 import { jwtDecode } from "jwt-decode";
 import { useUserStore } from "../store/userStore";
 
-const BaseUrl = "http://localhost";
+const BaseUrl = "http://localhost:8000";
+const BaseUrl2 = "http://localhost:3000";
 
 let isTokenRefreshing = false;
 let newTokenPromise: Promise<AxiosResponse<any, any>> | null = null;
 
-export default function useAxios() {
-  const { setLoginStatus } = useUserStore();
+export default function useAxios(express: boolean = false) {
+  const { setLoginStatus, setDecodedToken } = useUserStore();
   const instance = axios.create({
-    baseURL: BaseUrl,
+    baseURL: express ? BaseUrl2 : BaseUrl,
     headers: {
       "Content-Type": "application/json",
     },
@@ -26,14 +27,16 @@ export default function useAxios() {
         isTokenRefreshing = true;
         newTokenPromise = getRefreshToken()
           .then((newToken) => {
-            localStorage.setItem("access", newToken.data.access_token);
-            localStorage.setItem("refresh", newToken.data.refresh_token);
+            localStorage.setItem("access", newToken.data.access);
+            localStorage.setItem("refresh", newToken.data.refresh);
+            setDecodedToken(jwtDecode(newToken.data.access));
             isTokenRefreshing = false;
             newTokenPromise = null;
             return newToken;
           })
           .catch((error) => {
             setLoginStatus(false);
+            setDecodedToken(null);
             isTokenRefreshing = false;
             newTokenPromise = null;
             localStorage.removeItem("access");
@@ -74,7 +77,7 @@ function checkTokenExpire(token: string | null) {
 
 async function getRefreshToken() {
   const refreshToken = localStorage.getItem("refresh");
-  return await axios.post(BaseUrl + "/auth/token/refresh/", {
+  return await axios.post(BaseUrl + "/api/v1/token/refresh/", {
     token: refreshToken,
   });
 }

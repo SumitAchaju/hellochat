@@ -7,6 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { userType } from "../../../types/fetchTypes";
 import useAxios from "../../../hooks/useAxios";
 import notify, { notifyPromise } from "../../toast/MsgToast";
+import { useUserStore } from "../../../store/userStore";
 
 type Props = {};
 
@@ -15,6 +16,8 @@ export default function EditProfile({}: Props) {
   const [profilePic, setProfilePic] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+
+  const { user } = useUserStore();
 
   const handleFilePick = () => {
     const file = fileInputRef.current?.files?.[0];
@@ -27,15 +30,24 @@ export default function EditProfile({}: Props) {
     }
   };
   const api = useAxios();
+  const profileUpdate = useMutation({
+    mutationKey: ["updateProfile"],
+    mutationFn: async (form: FormData) => {
+      const res = await api.patch(`/api/v1/user/${user?.id}/`, form);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getUser"] });
+    },
+  });
   const profilePicUpdate = useMutation({
     mutationKey: ["updateProfilePic"],
     mutationFn: async (file: File) => {
       const formData = new FormData();
-      formData.append("uploaded_file", file as Blob);
-      const res = await api.post("/account/upload/profile", formData, {
+      formData.append("profile", file as Blob);
+      const res = await api.patch(`/api/v1/user/${user?.id}/`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          "Access-Control-Allow-Origin": "*",
         },
       });
       return res.data;
@@ -45,16 +57,6 @@ export default function EditProfile({}: Props) {
     },
   });
 
-  const profileDataMutation = useMutation({
-    mutationKey: ["updateProfileData"],
-    mutationFn: async (form: FormData) => {
-      const res = await api.patch("/account/updateuser", form);
-      return res.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["getUser"] });
-    },
-  });
   const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -68,7 +70,7 @@ export default function EditProfile({}: Props) {
         await profilePicUpdate.mutateAsync(file);
       }
       if (checkFormDataChange(userData, form)) {
-        await profileDataMutation.mutateAsync(form);
+        await profileUpdate.mutateAsync(form);
       }
     };
     notifyPromise({

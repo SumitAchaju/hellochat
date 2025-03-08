@@ -4,11 +4,12 @@ import useAxios from "../hooks/useAxios";
 import { notifyPromise } from "../components/toast/MsgToast";
 import { authUrl } from "../utils/apiurl";
 import { useUserStore } from "../store/userStore";
+import { jwtDecode } from "jwt-decode";
 
 type Props = {};
 
 export default function Login({}: Props) {
-  const { loginStatus, setLoginStatus } = useUserStore();
+  const { loginStatus, setLoginStatus, setDecodedToken } = useUserStore();
 
   const navigate = useNavigate();
   const api = useAxios();
@@ -25,9 +26,10 @@ export default function Login({}: Props) {
         await Promise.reject(res);
         return;
       }
-      localStorage.setItem("access", res.data.access_token);
-      localStorage.setItem("refresh", res.data.refresh_token);
+      localStorage.setItem("access", res.data.access);
+      localStorage.setItem("refresh", res.data.refresh);
       setLoginStatus(true);
+      setDecodedToken(jwtDecode(res.data.access));
 
       navigate("/");
     };

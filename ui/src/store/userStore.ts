@@ -1,11 +1,14 @@
 import { create } from "zustand";
 import { userType } from "../types/fetchTypes";
+import { jwtDecode } from "jwt-decode";
 
 interface userState {
   loginStatus: boolean;
   setLoginStatus: (status: boolean) => void;
   user: userType | undefined;
   setUser: (user: userType) => void;
+  decodedToken: any;
+  setDecodedToken: (token: any) => void;
 }
 
 export const useUserStore = create<userState>((set) => ({
@@ -13,4 +16,8 @@ export const useUserStore = create<userState>((set) => ({
   setLoginStatus: (status: boolean) => set({ loginStatus: status }),
   user: undefined,
   setUser: (user: userType) => set({ user }),
+  decodedToken: !!localStorage.getItem("access")
+    ? jwtDecode(localStorage.getItem("access") as string)
+    : null,
+  setDecodedToken: (token: any) => set({ decodedToken: token }),
 }));

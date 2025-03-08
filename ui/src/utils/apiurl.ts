@@ -42,9 +42,9 @@ export const userUrl = {
     if (uid) {
       return `/${baseTag}/${userTag}/getuser/?uid=${uid}`;
     } else if (user_id) {
-      return `/${baseTag}/${userTag}/getuser/?user_id=${user_id}`;
+      return `/${baseTag}/${userTag}/${user_id}/`;
     }
-    return `/${baseTag}/${userTag}/getuser/`;
+    return `/${baseTag}/${userTag}/1/`;
   },
 
   createUser: `/${baseTag}/${userTag}/createuser/`,

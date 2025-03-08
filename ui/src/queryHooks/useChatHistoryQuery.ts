@@ -6,7 +6,7 @@ import { roomUrl } from "../utils/apiurl";
 const KEY = ["chatHistory"];
 
 export default function useChatHistoryQuery() {
-  const api = useAxios();
+  const api = useAxios(true);
   const { data, isSuccess, isLoading, isError, error } = useQuery({
     queryKey: KEY,
     queryFn: async () => {

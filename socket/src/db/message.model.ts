@@ -16,6 +16,7 @@ export const MessageSchema = new mongoose.Schema({
   },
   fileLink: {
     type: String,
+    default: null,
   },
   fileType: {
     type: String,
@@ -30,6 +31,26 @@ export const MessageSchema = new mongoose.Schema({
     type: String,
     enum: ["none", "all", "self"],
     default: "none",
+  },
+  status: {
+    type: String,
+    enum: ["delivered", "seen", "sent"],
+    default: "sent",
+  },
+  seenBy: {
+    type: [
+      {
+        user_id: {
+          type: Number,
+          required: true,
+        },
+        seen_at: {
+          type: String,
+          default: () => formatDate(new Date()),
+        },
+      },
+    ],
+    default: [],
   },
 });
 

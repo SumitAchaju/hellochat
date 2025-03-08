@@ -38,20 +38,21 @@ export type roomUserType = {
 };
 
 export type roomType = {
-  users: roomUserType[];
-  created_at: string;
-  type: string;
-  created_by: null | number;
-  is_active: boolean;
-  id: string;
+  _id: string;
+  conversationId: string;
+  name: string;
+  type: "group" | "direct";
+  active: boolean;
+  createdAt: string;
+  members: {
+    userId: string;
+    role: string;
+    unRead: number;
+  }[];
+  lastMessage: messageType | null;
 };
 
-export type chatHistoryType = {
-  users: userType[];
-  room: roomType;
-  message: messageType;
-  quantity: number;
-};
+export type chatHistoryType = roomType;
 
 export type innerMsgType = {
   msg_text: string;
@@ -59,15 +60,21 @@ export type innerMsgType = {
 };
 
 export type messageType = {
-  id: string;
-  sender_id: number;
-  message_text: string;
-  created_at: string;
-  room_id: string;
-  message_type: msgType;
-  file_links: string[] | null;
-  status: msgStatusType;
-  seen_by: number[];
+  senderId: number;
+  conversationId: string;
+  message: string;
+  fileLink: string | null;
+  fileType: "image" | "video" | "audio" | "document" | "text";
+
+  seenBy: {
+    user_id: number;
+    seen_at: string;
+  }[];
+
+  status: "delivered" | "seen" | "sent";
+
+  createdAt: string;
+  removed: "none" | "all" | "self";
 };
 
 export type websocketResponseType = {

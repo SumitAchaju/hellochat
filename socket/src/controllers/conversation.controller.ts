@@ -21,7 +21,7 @@ class Conversation {
     res.status(200).json(data).end();
   }
 
-  @Get("/all")
+  @Get("/all/")
   async getAllConversation(req: Request, res: Response) {
     const { offset, limit } = req.query;
     const newOffset = parseInt(offset as string) || 0;
@@ -30,7 +30,30 @@ class Conversation {
     res.status(200).json(groupRooms).end();
   }
 
-  @Get("/:id")
+  @Get("/history/")
+  async getConversationByMembers(req: Request, res: Response) {
+    const userId = req.user?.user_id;
+    console.log(userId);
+    const { offset, limit } = req.query;
+    const newOffset = parseInt(offset as string) || 0;
+    const newLimit = parseInt(limit as string) || 0;
+    const data = await getConversationByMembers(userId, newOffset, newLimit);
+    res.status(200).json(data).end();
+  }
+
+  @Get("/initialRoom/")
+  async getInitialRoom(req: Request, res: Response) {
+    const userId = req.user?.user_id;
+
+    const latestMsg = await getLatestMessage(userId);
+    const room = await getConversationById(latestMsg?.conversationId || "");
+    if (!room) {
+      throw new NotFoundError("Inital Room", "Conversation");
+    }
+    res.status(200).json(room).end();
+  }
+
+  @Get("/:id/")
   async getConversationById(req: Request, res: Response) {
     const { id } = req.params;
     if (!id) {
@@ -41,25 +64,6 @@ class Conversation {
       throw new NotFoundError("Conversation");
     }
     res.status(200).json(conversation).end();
-  }
-
-  @Get("/history")
-  async getConversationByMembers(req: Request, res: Response) {
-    const userId = req.user?.user_id;
-    const { offset, limit } = req.query;
-    const newOffset = parseInt(offset as string) || 0;
-    const newLimit = parseInt(limit as string) || 0;
-    const data = await getConversationByMembers(userId, newOffset, newLimit);
-    res.status(200).json(data).end();
-  }
-
-  @Get("/initialRoom")
-  async getInitialRoom(req: Request, res: Response) {
-    const userId = req.user?.user_id;
-
-    const latestMsg = await getLatestMessage(userId);
-    const room = await getConversationById(latestMsg?.conversationId || "");
-    res.status(200).json(room).end();
   }
 }
 

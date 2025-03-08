@@ -1,5 +1,5 @@
 import { ConversationModel } from "../db/conversation.model.js";
-import type { messageType } from "./message.service.ts";
+import type { createMessage, messageType } from "./message.service.ts";
 
 type conversationDataType = {
   conversationId: string;
@@ -47,10 +47,10 @@ const getConversationByMembers = async (
 
 const updateLastMessage = async (
   conversationId: string,
-  message: messageType
+  message: Awaited<ReturnType<typeof createMessage>>
 ) => {
-  const conversation = await ConversationModel.findByIdAndUpdate(
-    conversationId,
+  const conversation = await ConversationModel.findOneAndUpdate(
+    { conversationId },
     { lastMessage: message },
     { new: true }
   );

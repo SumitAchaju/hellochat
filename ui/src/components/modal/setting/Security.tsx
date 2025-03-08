@@ -4,16 +4,21 @@ import Input from "../../Input";
 import Switch from "../../Switch";
 import useAxios from "../../../hooks/useAxios";
 import notify, { notifyPromise } from "../../toast/MsgToast";
+import { useUserStore } from "../../../store/userStore";
 
 type Props = {};
 
 export default function Security({}: Props) {
   const queryClient = useQueryClient();
   const api = useAxios();
+  const { user } = useUserStore();
   const updateUsernameMutation = useMutation({
     mutationKey: ["updateUsername"],
-    mutationFn: async (data: { username: string; password: string }) => {
-      const res = await api.put("/account/updateusername", data);
+    mutationFn: async (data: FormData) => {
+      const res = await api.patch(
+        `api/v1/user/${user?.id}/update-username/`,
+        data
+      );
       return res.data;
     },
     onSettled: () => {
@@ -22,35 +27,32 @@ export default function Security({}: Props) {
   });
   const updatePasswordMutation = useMutation({
     mutationKey: ["updatePassword"],
-    mutationFn: async (data: { old: string; new: string }) => {
-      const res = await api.put("/account/updatepassword", data);
+    mutationFn: async (data: FormData) => {
+      const res = await api.patch(
+        `/api/v1/user/${user?.id}/update-password/`,
+        data
+      );
       return res.data;
     },
   });
   const handleUsernameSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = {
-      username: e.currentTarget.username.value,
-      password: e.currentTarget.password.value,
-    };
+    const form = new FormData(e.currentTarget);
     notifyPromise({
-      promise: updateUsernameMutation.mutateAsync(data),
+      promise: updateUsernameMutation.mutateAsync(form),
       msg: "Username Updated",
       loading: "Updating Username...",
     });
   };
   const handlePasswordSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = {
-      old: e.currentTarget.oldpassword.value,
-      new: e.currentTarget.newpassword.value,
-    };
-    if (data.new !== e.currentTarget.confirmpassword.value) {
+    const form = new FormData(e.currentTarget);
+    if (form.get("new_password") !== form.get("confirm_password")) {
       notify("dumb", "Password does not match");
       return;
     }
     notifyPromise({
-      promise: updatePasswordMutation.mutateAsync(data),
+      promise: updatePasswordMutation.mutateAsync(form),
       msg: "Password Updated",
       loading: "Updating Password...",
     });
@@ -91,13 +93,13 @@ export default function Security({}: Props) {
       <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-4">
         <div className="flex gap-5">
           <Input
-            name="oldpassword"
+            name="old_password"
             labelname="Old Password"
             type="password"
             required
           />
           <Input
-            name="newpassword"
+            name="new_password"
             labelname="New Password"
             type="password"
             required
@@ -105,7 +107,7 @@ export default function Security({}: Props) {
         </div>
         <div className="flex gap-5 items-end">
           <Input
-            name="confirmpassword"
+            name="confirm_password"
             labelname="Confirm Password"
             type="password"
             required

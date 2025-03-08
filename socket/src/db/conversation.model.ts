@@ -36,6 +36,10 @@ const ConversationSchema = new mongoose.Schema({
         enum: ["admin", "member"],
         default: "member",
       },
+      unRead: {
+        type: Number,
+        default: 0,
+      },
     },
   ],
   lastMessage: MessageSchema,

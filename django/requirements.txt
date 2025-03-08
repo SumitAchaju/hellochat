@@ -7,3 +7,5 @@ shortuuid
 django-jazzmin
 python-dotenv
 Pillow
+django-filter
+django-crispy-forms

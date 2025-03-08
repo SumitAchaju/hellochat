@@ -11,7 +11,7 @@ type Props = {
   name: string;
   msgQuantity: number;
   active: boolean;
-  message: messageType;
+  message: messageType | null;
 };
 
 export default function RecentChat({
@@ -24,9 +24,15 @@ export default function RecentChat({
   const { user } = useUserStore();
   const msgData = useMemo(() => initilizeMsg(message), [message]);
   const myMsg = useMemo(
-    () => msgData.sender_id === user?.id,
+    () => msgData.senderId === user?.id,
     [msgData, user?.id]
   );
+  const msgStatus = useMemo(() => {
+    if (myMsg || msgData.senderId === 0) {
+      return true;
+    }
+    return msgData.seenBy.some((member) => member.user_id === user?.id);
+  }, [msgData]);
   return (
     <div className="flex items-center gap-2">
       <ProfilePic image={img} active={active} size={50} circle={false} />
@@ -37,19 +43,16 @@ export default function RecentChat({
           </p>
           <p
             className={`${
-              msgData.status === "seen" || msgData.sender_id === 0 || myMsg
-                ? "text-secondary-text"
-                : "text-primary-text"
+              msgStatus ? "text-secondary-text" : "text-primary-text"
             } font-normal text-[15px] text-ellipsis max-w-[170px] whitespace-nowrap overflow-hidden`}
           >
-            {user?.id === msgData.sender_id ? "You: " : ""}{" "}
-            {msgData.message_text}
+            {user?.id === msgData.senderId ? "You: " : ""} {msgData.message}
           </p>
         </div>
         <div className="flex flex-col gap-1">
           <span className="text-secondary-text text-[12px] block mb-2">
-            {msgData.created_at !== ""
-              ? extracteDateToOneWord(msgData.created_at)
+            {msgData.createdAt !== ""
+              ? extracteDateToOneWord(msgData.createdAt)
               : ""}
           </span>
           {myMsg ? (
@@ -72,17 +75,18 @@ export default function RecentChat({
   );
 }
 
-function initilizeMsg(msg: messageType | null) {
+function initilizeMsg(msg: messageType | null): messageType {
   if (msg == null) {
     return {
-      sender_id: 0,
-      message_text: "Say Hi",
-      created_at: "",
-      room_id: "",
-      message_type: "text",
-      file_links: null,
-      status: "sent",
-      seen_by: [],
+      senderId: 0,
+      message: "Say Hi",
+      createdAt: "",
+      conversationId: "",
+      fileType: "text",
+      fileLink: null,
+      seenBy: [],
+      removed: "none",
+      status: "seen",
     };
   }
   return msg;

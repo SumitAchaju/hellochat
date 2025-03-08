@@ -1,6 +1,7 @@
 import toast, { Toast } from "react-hot-toast";
 import { AxiosError } from "../../hooks/useAxios";
 import { userType } from "../../types/fetchTypes";
+import _ from "lodash";
 
 type toastConfigType = Partial<
   Pick<
@@ -71,8 +72,9 @@ export const notifyPromise = ({
         : (error: AxiosError) => {
             if (error.response?.status === 422) {
               return extract_422_error(error);
-            }
-            if (error.response?.data.detail) {
+            } else if (error.response?.status === 400) {
+              return extract_bad_request_error(error);
+            } else if (error.response?.data.detail) {
               return error.response.data.detail;
             }
             return error.message;
@@ -86,6 +88,19 @@ const extract_422_error = (error: AxiosError) => {
   const location = error.response?.data.detail[0].loc.pop();
   const msg = error.response?.data.detail[0].msg;
   return `${msg} at field "${location}"`;
+};
+
+const extract_bad_request_error = (error: AxiosError) => {
+  const res = error.response?.data;
+  const first = _.head(_.toPairs(res));
+  if (!first) return "Bad Request";
+  const omitted = _.omit(res, first?.[0] || "");
+  _.toPairs(omitted).map(([key, value]) => {
+    notify("error", `${_.capitalize(key)}: ${value.join(", ")}`);
+  });
+  if (_.isArray(first[1]))
+    return `${_.capitalize(first[0])}: ${first[1].join(", ")}`;
+  return `${_.capitalize(first[0])}: ${first[1]}`;
 };
 
 export const notifyMsg = (msg: string, senderUser: userType | undefined) => {

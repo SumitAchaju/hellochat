@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_filters",
+    "crispy_forms",
     "rest_framework",
     "corsheaders",
     "rest_framework_simplejwt",
@@ -133,7 +135,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
+
+# Static files (CSS, JS, Images)
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]  # For additional static files
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # For collectstatic in production
+
+# Media files (User uploads)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -144,7 +155,10 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "account.authentication.JWTAuthenticationBothMethods",  # Custom JWT Authentication class
         "rest_framework.authentication.SessionAuthentication",
-    )
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
 }
 
 SIMPLE_JWT = {

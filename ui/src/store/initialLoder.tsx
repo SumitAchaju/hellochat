@@ -13,11 +13,16 @@ type Props = {
 
 export default function InitialLoder({ children }: Props) {
   // user
-  const { loginStatus, setUser } = useUserStore();
+  const { loginStatus, setUser, decodedToken } = useUserStore();
   const api = useAxios();
   const userQuery = useQuery<userType>({
     queryKey: ["getUser"],
-    queryFn: () => api.get(userUrl.getUser()).then((res) => res.data),
+    queryFn: async () => {
+      const fetch = await api.get(
+        userUrl.getUser(undefined, decodedToken.user_id)
+      );
+      return fetch.data;
+    },
     enabled: loginStatus,
     retry: 2,
   });
@@ -26,6 +31,10 @@ export default function InitialLoder({ children }: Props) {
       setUser(userQuery.data);
     }
   }, [userQuery.data]);
+
+  if (userQuery.isError) {
+    console.log(userQuery.error);
+  }
 
   // Theme
   const { setTheme } = useThemeStore();
