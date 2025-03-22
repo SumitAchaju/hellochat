@@ -2,7 +2,6 @@ import { FormEvent, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAxios from "../hooks/useAxios";
 import { notifyPromise } from "../components/toast/MsgToast";
-import { authUrl } from "../utils/apiurl";
 import { useUserStore } from "../store/userStore";
 import { jwtDecode } from "jwt-decode";
 
@@ -21,7 +20,7 @@ export default function Login({}: Props) {
       password: e.currentTarget.password.value,
     };
     const login = async () => {
-      const res = await api.post(authUrl.loginUser, formData);
+      const res = await api.post("/django/api/v1/token/", formData);
       if (res.status !== 200) {
         await Promise.reject(res);
         return;

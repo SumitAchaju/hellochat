@@ -9,7 +9,7 @@ def set_jwt_cookies(response, access_token, refresh_token):
         access_token,
         max_age=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
         httponly=True,
-        samesite="None",
+        samesite="lax",
     )
 
     response.set_cookie(
@@ -17,7 +17,7 @@ def set_jwt_cookies(response, access_token, refresh_token):
         refresh_token,
         max_age=settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"],
         httponly=True,
-        samesite="None",
+        samesite="lax",
     )
 
     return response
@@ -42,7 +42,29 @@ class JWTTokenCookieMixin:
             return response
 
         else:
-            raise NotImplementedError("base class doesnot have post method")
+            raise NotImplementedError("Base class doesnot have post method")
+
+
+class CustomTokenSerializer:
+    def get_token(self, user):
+        if hasattr(super(), "get_token"):
+            token = super().get_token(user)
+            # Assign roles based on user model fields
+            return add_user_role(token, user)
+        else:
+            raise NotImplementedError("Base class doesnot have get_token method")
+
+
+def add_user_role(token, user):
+    """Helper function to add user role to the token."""
+    if user.is_superuser:
+        token["role"] = "superadmin"
+    elif user.is_staff:
+        token["role"] = "admin"
+    else:
+        token["role"] = "user"
+
+    return token
 
 
 def resize_image(img: ImageFile, size: tuple[int, int]) -> ImageFile:

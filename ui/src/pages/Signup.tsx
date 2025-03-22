@@ -4,7 +4,6 @@ import { extractDataForm } from "../utils/extractData";
 import { userType } from "../types/fetchTypes";
 import useAxios from "../hooks/useAxios";
 import notify, { notifyPromise } from "../components/toast/MsgToast";
-import { userUrl } from "../utils/apiurl";
 import { useUserStore } from "../store/userStore";
 import { jwtDecode } from "jwt-decode";
 
@@ -25,15 +24,15 @@ export default function Signup({}: Props) {
       return;
     }
     const register = async () => {
-      const res = await api.post(userUrl.createUser, data);
+      const res = await api.post("/django/api/v1/user/", data);
       if (res.status !== 201) {
         await Promise.reject(res);
         return;
       }
-      localStorage.setItem("access", res.data.access);
-      localStorage.setItem("refresh", res.data.refresh);
+      localStorage.setItem("access", res.data.token.access);
+      localStorage.setItem("refresh", res.data.token.refresh);
       setLoginStatus(true);
-      setDecodedToken(jwtDecode(res.data.access));
+      setDecodedToken(jwtDecode(res.data.token.access));
       navigate("/");
     };
     await notifyPromise({

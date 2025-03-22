@@ -18,16 +18,16 @@ export default function RedirectRoute({}: Props) {
   const [roomId, setRoomId] = useState<string | null>(
     localStorage.getItem("roomId")
   );
-  const api = useAxios(true);
+  const api = useAxios();
 
   const initialRoomIdQuery = useQuery({
     queryKey: ["initialRoom"],
     queryFn: () =>
       api.get(roomUrl.initialRoom).then((res) => {
-        console.log(res);
+        console.log(res.data);
         setRoomId(res.data.conversationId);
-        localStorage.setItem("roomId", res.data.conversationId);
-        return res.data.conversationId;
+        localStorage.setItem("roomId", "hello");
+        return "hello";
       }),
     enabled: !roomId,
   });

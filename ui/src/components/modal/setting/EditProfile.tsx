@@ -33,7 +33,7 @@ export default function EditProfile({}: Props) {
   const profileUpdate = useMutation({
     mutationKey: ["updateProfile"],
     mutationFn: async (form: FormData) => {
-      const res = await api.patch(`/api/v1/user/${user?.id}/`, form);
+      const res = await api.patch(`/django/api/v1/user/${user?.id}/`, form);
       return res.data;
     },
     onSuccess: () => {
@@ -45,11 +45,15 @@ export default function EditProfile({}: Props) {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("profile", file as Blob);
-      const res = await api.patch(`/api/v1/user/${user?.id}/`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await api.patch(
+        `/django/api/v1/user/${user?.id}/`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       return res.data;
     },
     onSuccess: () => {

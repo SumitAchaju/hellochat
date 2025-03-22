@@ -9,10 +9,6 @@ import Setting from "../modal/Setting";
 import OnlineUser from "../modal/OnlineUser";
 import { chatHistoryType, onlineUserType } from "../../types/fetchTypes";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import useOnlineUserQuery from "../../queryHooks/useOnlineUserQuery";
-import useChatHistoryQuery from "../../queryHooks/useChatHistoryQuery";
-import { useEffect, useRef, useState } from "react";
-import { useDebouncedCallback } from "use-debounce";
 import { useUserStore } from "../../store/userStore";
 
 type Props = {};
@@ -20,32 +16,11 @@ type Props = {};
 export default function ChatHistory({}: Props) {
   const go = useNavigate();
   const { roomId } = useParams();
-  const onlineUserQuery = useOnlineUserQuery();
-  const historyQuery = useChatHistoryQuery();
-
   const { user } = useUserStore();
-
-  const historySearchRef = useRef<HTMLInputElement | null>(null);
-  const [historyUser, setHistoryUser] = useState<chatHistoryType[]>([]);
-
-  const searchFilter = () =>
-    historyQuery.data?.filter((chat: chatHistoryType) =>
-      (
-        chat.members[0]?.userId?.toLowerCase() +
-        " " +
-        chat.members[0]?.userId?.toLowerCase()
-      ).includes((historySearchRef.current?.value ?? "").toLowerCase())
-    );
-
-  const handleChatSearch = useDebouncedCallback(() => {
-    setHistoryUser(searchFilter());
-  }, 1000);
-
-  useEffect(() => {
-    if (historyQuery.data) {
-      setHistoryUser(searchFilter());
-    }
-  }, [historyQuery.data]);
+  const onlineUserQuery = {
+    data: [],
+  };
+  const historyUser: any[] = [];
   return (
     <div className="flex flex-col h-full">
       <div className="flex gap-2 items-center min-h-[92px] px-[10%]">
@@ -115,11 +90,10 @@ export default function ChatHistory({}: Props) {
               type="text"
               placeholder="Search Chats..."
               className="rounded-full block py-[10px] ps-12 outline-primary-text outline outline-1 pe-5 w-full text-primary-text placeholder:text-primary-text bg-transparent"
-              onChange={handleChatSearch}
-              ref={historySearchRef}
+              onChange={undefined}
+              ref={undefined}
               onBlur={(e) => {
                 e.currentTarget.value = "";
-                setHistoryUser(searchFilter());
               }}
             />
             <div className="absolute top-1/2 -translate-y-1/2 left-5">
@@ -140,9 +114,7 @@ export default function ChatHistory({}: Props) {
                 onClick={() => go(`/main/${chat.conversationId}`)}
               >
                 <RecentChat
-                  img={
-                    "http://localhost:8000/media/profile/default_profile.jpg"
-                  }
+                  img={"http://localhost/media/profile/default_profile.jpg"}
                   name={chat.name}
                   msgQuantity={user?.id ? chat.members[user.id].unRead : 0}
                   message={chat.lastMessage}

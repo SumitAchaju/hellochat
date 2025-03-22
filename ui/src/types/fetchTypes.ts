@@ -24,6 +24,14 @@ export type userType = {
   requested_by?: userType[];
 };
 
+export type relationUserType = {
+  id: number;
+  user: userType;
+  blocked: userType[];
+  requested: userType[];
+  friends: userType[];
+};
+
 export type onlineUserType = {
   user: userType;
   room: roomType;
@@ -60,6 +68,7 @@ export type innerMsgType = {
 };
 
 export type messageType = {
+  _id: string;
   senderId: number;
   conversationId: string;
   message: string;

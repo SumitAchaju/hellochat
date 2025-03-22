@@ -11,7 +11,6 @@ import processMsg, {
   processMsgType,
 } from "../utils/processMsg";
 import { messageType } from "../types/fetchTypes";
-import { messageUrl } from "../utils/apiurl";
 
 export type useMsgQueryType = InfiniteQueryObserverResult<
   InfiniteData<processMsgType[], unknown>
@@ -29,7 +28,7 @@ export default function useMsgQuery(roomId: string | undefined) {
     queryKey: [KEY, roomId],
     queryFn: async ({ pageParam }): Promise<processMsgType[]> => {
       const fetch = await api.get(
-        messageUrl.roomMessage(roomId, pageParam, LIMIT)
+        `/express/api/v1/message/${roomId}/?offset=${pageParam}&limit=${LIMIT}`
       );
       if (fetch.status !== 200) {
         return fetch.data;

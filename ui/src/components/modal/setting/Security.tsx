@@ -16,7 +16,7 @@ export default function Security({}: Props) {
     mutationKey: ["updateUsername"],
     mutationFn: async (data: FormData) => {
       const res = await api.patch(
-        `api/v1/user/${user?.id}/update-username/`,
+        `/django/api/v1/user/${user?.id}/update-username/`,
         data
       );
       return res.data;
@@ -29,7 +29,7 @@ export default function Security({}: Props) {
     mutationKey: ["updatePassword"],
     mutationFn: async (data: FormData) => {
       const res = await api.patch(
-        `/api/v1/user/${user?.id}/update-password/`,
+        `/django/api/v1/user/${user?.id}/update-password/`,
         data
       );
       return res.data;

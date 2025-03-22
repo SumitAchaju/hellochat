@@ -11,9 +11,12 @@ import Spinner from "../Spinner";
 import { useInView } from "react-intersection-observer";
 import { notifyPromise } from "../toast/MsgToast";
 import { useUserStore } from "../../store/userStore";
+import { relationType } from "../../queryHooks/useAddFriendQuery";
+import { relationUserType } from "../../types/fetchTypes";
+import _ from "lodash";
 
 type Props = {};
-type SearchType = "name" | "uid" | "contact";
+type SearchType = "name" | "uid" | "contact_number";
 
 export default function AddFriend({}: Props) {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,8 +82,8 @@ const AddFriendModal = () => {
         />
         <Button
           text="Contact Number"
-          varient={searchT == "contact" ? "primary" : "secondary"}
-          onClick={() => handleButtonClick("contact")}
+          varient={searchT == "contact_number" ? "primary" : "secondary"}
+          onClick={() => handleButtonClick("contact_number")}
           hover={false}
         />
       </div>
@@ -117,7 +120,7 @@ const AddFriendModal = () => {
           </p>
         ) : (
           userQuery.data?.pages.flat().map((user, index) => {
-            const buttonStyle = extractButtonStyle(user);
+            const buttonStyle = extractButtonStyle(user, userStore.relation);
             return (
               <div
                 key={user.id}
@@ -130,7 +133,8 @@ const AddFriendModal = () => {
                   <ProfilePic size={50} image={user.profile} />
                   <div>
                     <p className="text-primary-text font-medium">
-                      {user.first_name} {user.last_name}
+                      {_.capitalize(user.first_name)}{" "}
+                      {_.capitalize(user.last_name)}
                     </p>
                     <span className="block text-secondary-text text-[14px]">
                       {user.address}
@@ -143,7 +147,7 @@ const AddFriendModal = () => {
                   <Button
                     disabled={handleMutation.isPending}
                     varient="secondary"
-                    text={buttonStyle}
+                    text={_.capitalize(buttonStyle)}
                     onClick={() =>
                       notifyPromise({
                         promise: handleMutation.mutateAsync({
@@ -170,44 +174,39 @@ const AddFriendModal = () => {
   );
 };
 
-type extractButtonStyleReturnType =
-  | "Unfriend"
-  | "Cancel Request"
-  | "Unblock"
-  | "Request"
-  | "Accept Request";
-
 const extractButtonStyle = (
-  user: searchFriendTypes
-): extractButtonStyleReturnType => {
-  switch (user.friend_status) {
-    case "friend":
-      return "Unfriend";
-
-    case "requested":
-      return "Cancel Request";
-
-    case "requested_by":
-      return "Accept Request";
-
-    case "blocked":
-      return "Unblock";
-    default:
-      return "Request";
+  user: searchFriendTypes,
+  relation: relationUserType | undefined
+): relationType => {
+  if (!relation) return "request";
+  if (relation.friends.some((friend) => friend.id === user.id)) {
+    return "unfriend";
   }
+  if (relation.requested.some((requested) => requested.id === user.id)) {
+    return "cancel_request";
+  }
+  if (relation.requested.some((requested) => requested.id === user.id)) {
+    return "accept";
+  }
+  if (relation.blocked.some((blocked) => blocked.id === user.id)) {
+    return "unblock";
+  }
+  return "request";
 };
 
-const extractToastMsg = (buttonType: extractButtonStyleReturnType) => {
+const extractToastMsg = (buttonType: relationType) => {
   switch (buttonType) {
-    case "Unfriend":
+    case "unfriend":
       return { msg: "Sucessfully Unfriended", loading: "Unfriending..." };
-    case "Cancel Request":
+    case "cancel_request":
       return { msg: "Sucessfully Canceled", loading: "Canceling..." };
-    case "Unblock":
+    case "unblock":
       return { msg: "Sucessfully Unblocked", loading: "Unblocking..." };
-    case "Request":
+    case "request":
       return { msg: "Sucessfully Requested", loading: "Requesting..." };
-    case "Accept Request":
+    case "accept":
       return { msg: "Sucessfully Accepted", loading: "Accepting..." };
+    default:
+      return { msg: "Sucessfully Unknown", loading: "Unknown..." };
   }
 };

@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import type { userRole } from "../middlewares/auth.js";
+export type userRole = "staff" | "user" | "superadmin";
 
 export type jwtUserPlayload = {
   user_id: string;

@@ -76,6 +76,10 @@ export const notifyPromise = ({
               return extract_bad_request_error(error);
             } else if (error.response?.data.detail) {
               return error.response.data.detail;
+            } else if (error.response?.data.error) {
+              return error.response.data.error;
+            } else if (error.response?.data) {
+              return error.response.data;
             }
             return error.message;
           },

@@ -1,40 +1,59 @@
+from operator import add
 from rest_framework.serializers import ModelSerializer, ValidationError
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer,
+    TokenRefreshSerializer,
 )
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 
 from .models import User
+from rest_framework_simplejwt.tokens import RefreshToken
+from .utils import CustomTokenSerializer, add_user_role
 
 
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def get_token(self, user):
-        token = super().get_token(user)
+class CustomTokenObtainPairSerializer(CustomTokenSerializer, TokenObtainPairSerializer):
+    pass
 
-        # Assign roles based on user model fields
-        if user.is_superuser:
-            token["role"] = "superadmin"
-        elif user.is_staff:
-            token["role"] = "admin"
-        else:
-            token["role"] = "user"
 
-        return token
+class CustomTokenRefreshSerializer(CustomTokenSerializer, TokenRefreshSerializer):
+    pass
 
 
 class UserSerializer(ModelSerializer):
+    token = serializers.SerializerMethodField()
+
     class Meta:
         abstract = True
         model = User
-        read_only_fields = ["uid", "username", "password"]
+        read_only_fields = ["uid"]
+        extra_kwargs = {
+            "password": {"write_only": True, "validators": [validate_password]},
+            "email": {"required": True},
+            "first_name": {"required": True},
+            "last_name": {"required": True},
+            "contact_number": {"required": True},
+            "contact_number_country_code": {"required": True},
+            "username": {"required": True, "write_only": True},
+        }
 
     @staticmethod
     def validate_contact_number(value):
+        print(len(str(value)))
+        print(value)
         if len(str(value)) != 10:
             raise ValidationError("Contact number should be of 10 digits")
         return value
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        token = add_user_role(RefreshToken.for_user(user), user)
+        user._token = {"access": str(token.access_token), "refresh": str(token)}
+        return user
+
+    def get_token(self, obj):
+        return getattr(obj, "_token", None)
 
 
 class AdminUserSerializer(UserSerializer):
@@ -44,7 +63,7 @@ class AdminUserSerializer(UserSerializer):
 
 class RegularUserSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
-        exclude = ["groups", "user_permissions", "password", "username"]
+        exclude = ["groups", "user_permissions"]
         read_only_fields = [
             "uid",
             "is_staff",
@@ -53,6 +72,7 @@ class RegularUserSerializer(UserSerializer):
             "date_joined",
             "last_login",
         ]
+        write_only_fields = ["password", "username"]
 
 
 class UpdateUsernameSerializer(serializers.Serializer):

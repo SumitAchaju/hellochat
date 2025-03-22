@@ -4,18 +4,33 @@ import { AxiosRequestConfig, AxiosResponse } from "axios";
 import { jwtDecode } from "jwt-decode";
 import { useUserStore } from "../store/userStore";
 
-const BaseUrl = "http://localhost:8000";
-const BaseUrl2 = "http://localhost:3000";
+const BaseUrl = "http://localhost";
 
 let isTokenRefreshing = false;
 let newTokenPromise: Promise<AxiosResponse<any, any>> | null = null;
 
-export default function useAxios(express: boolean = false) {
+function getCookie(name: string) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split("; ");
+    for (let i = 0; i < cookies.length; i++) {
+      const [cookieName, cookieVal] = cookies[i].split("=");
+      if (cookieName === name) {
+        cookieValue = decodeURIComponent(cookieVal);
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+export default function useAxios() {
   const { setLoginStatus, setDecodedToken } = useUserStore();
   const instance = axios.create({
-    baseURL: express ? BaseUrl2 : BaseUrl,
+    baseURL: BaseUrl,
     headers: {
       "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken"),
     },
   });
 
@@ -77,7 +92,7 @@ function checkTokenExpire(token: string | null) {
 
 async function getRefreshToken() {
   const refreshToken = localStorage.getItem("refresh");
-  return await axios.post(BaseUrl + "/api/v1/token/refresh/", {
+  return await axios.post(BaseUrl + "/django/api/v1/token/refresh/", {
     token: refreshToken,
   });
 }

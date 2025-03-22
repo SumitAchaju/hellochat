@@ -22,8 +22,8 @@ class User(AbstractUser):
         null=True,
         default="profile/default_profile.jpg",
     )
-    contact_number = models.BigIntegerField(unique=True)
-    contact_number_country_code = models.IntegerField()
+    contact_number = models.CharField(max_length=10, unique=True)
+    contact_number_country_code = models.CharField(max_length=3)
 
     REQUIRED_FIELDS = [
         "email",

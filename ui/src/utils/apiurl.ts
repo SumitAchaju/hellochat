@@ -21,7 +21,7 @@ export const roomTag = "conversation";
 export const roomUrl = {
   getRoom: `/${baseTag}/${roomTag}/`,
   chatHistory: `/${baseTag}/${roomTag}/history/`,
-  initialRoom: `/${baseTag}/${roomTag}/initialRoom/`,
+  initialRoom: `/express/${baseTag}/${roomTag}/initialRoom/`,
 
   getRoomById: (roomId: string | undefined) =>
     `/${baseTag}/${roomTag}/${roomId}/`,
@@ -55,7 +55,7 @@ export const userUrl = {
   deleteUser: `/${baseTag}/${userTag}/deleteuser/`,
 
   searchUser: (query: searchUser) =>
-    `/${baseTag}/${userTag}/search/?search_type=${query.searchType}&search=${query.search}&limit=${query.limit}&offset=${query.offset}`,
+    `/${baseTag}/${userTag}/1/?search_type=${query.searchType}&search=${query.search}&limit=${query.limit}&offset=${query.offset}`,
   onlineUser: `/${baseTag}/${userTag}/onlineuser/`,
 };
 

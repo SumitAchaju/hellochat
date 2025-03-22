@@ -9,6 +9,7 @@ from account.permissions import IsOwnerOrReadOnly
 from relation.filters import UserRelationFilters
 from relation.models import UserRelation
 from relation.serializer import RelationSerializer, RelationUpdateSerializer
+from rest_framework.decorators import action
 
 
 class RelationApiView(ModelViewSet):
@@ -17,14 +18,20 @@ class RelationApiView(ModelViewSet):
     filterset_class = UserRelationFilters
     queryset = UserRelation.objects.all()
     serializer_class = RelationSerializer
+    lookup_field = "user__id"
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context["request"] = self.request
         return context
 
+    def get_serializer_class(self):
+        if self.action == "patch":
+            return RelationUpdateSerializer
+        return super().get_serializer_class()
+
     def patch(self, request, *args, **kwargs):
-        data = RelationUpdateSerializer(data=request.data)
+        data = self.get_serializer(data=request.data)
         data.is_valid(raise_exception=True)
         requested_user = get_object_or_404(
             User, id=data.validated_data["requested_user_id"]
@@ -47,3 +54,8 @@ class RelationApiView(ModelViewSet):
             return Response(
                 {"error": "Invalid relation type"}, status=status.HTTP_400_BAD_REQUEST
             )
+
+    @action(detail=False, methods=["get"], url_path="me")
+    def me(self, request):
+        user = UserRelation.objects.get(user=request.user)
+        return Response(self.get_serializer(user).data)

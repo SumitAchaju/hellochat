@@ -13,7 +13,7 @@ import "swiper/css";
 import { Toaster } from "react-hot-toast";
 import RedirectRoute from "./pages/RedirectRoute";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import InitialLoder from "./store/initialLoder";
+import InitialLoder from "./pages/InitialLoder";
 
 const queryClient = new QueryClient({
   defaultOptions: {

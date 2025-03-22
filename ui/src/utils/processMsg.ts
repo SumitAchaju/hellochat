@@ -1,4 +1,4 @@
-import { messageType, msgStatusType, msgType } from "../types/fetchTypes";
+import { messageType } from "../types/fetchTypes";
 import { checkTimeDiff } from "./processDate";
 
 export type dateType = {
@@ -11,24 +11,8 @@ export type dateType = {
   hour12: string;
 };
 
-export type processInnerMsgType = {
-  id: string;
-  created_at: string;
-  message_type: msgType;
-  file_links: string[] | null;
-  seen_by: number[];
-  status: msgStatusType;
-  message_text: string;
-};
-
-export type processMsgType = {
-  sender_id: number;
-  message: processInnerMsgType[];
-  room_id: string;
-};
-
 export default function processMsg(msg: messageType[]) {
-  let newMsg: processMsgType[] = [];
+  let newMsg: any[] = [];
   msg.forEach((m, index) => {
     if (index == 0) {
       newMsg.push(addMsg(m));
@@ -38,8 +22,8 @@ export default function processMsg(msg: messageType[]) {
     let latest_msg = data?.message.pop();
     if (data && latest_msg) {
       if (
-        data.sender_id == m.sender_id &&
-        checkTimeDiff(latest_msg.created_at, m.created_at, 60)
+        data?.senderId == m.senderId &&
+        checkTimeDiff(latest_msg.created_at, m.createdAt, 60)
       ) {
         data.message.push(latest_msg);
         data.message.push(addInnerMsg(m));
@@ -55,18 +39,15 @@ export default function processMsg(msg: messageType[]) {
   return newMsg;
 }
 
-export function addToProcessMsg(
-  prevMsg: processMsgType[] | undefined,
-  msg: messageType
-) {
+export function addToProcessMsg(prevMsg: any[] | undefined, msg: messageType) {
   if (prevMsg === undefined) return prevMsg;
   let newMsg = structuredClone(prevMsg);
   let data = newMsg.pop();
   let latest_msg = data?.message.pop();
   if (data && latest_msg) {
     if (
-      data.sender_id == msg.sender_id &&
-      checkTimeDiff(latest_msg.created_at, msg.created_at, 60)
+      data.sender_id == msg.senderId &&
+      checkTimeDiff(latest_msg.created_at, msg.createdAt, 60)
     ) {
       data.message.push(latest_msg);
       data.message.push(addInnerMsg(msg));
@@ -82,20 +63,20 @@ export function addToProcessMsg(
 
 function addMsg(msg: messageType) {
   return {
-    sender_id: msg.sender_id,
+    senderId: msg.senderId,
     message: [addInnerMsg(msg)],
-    room_id: msg.room_id,
+    roomId: msg.conversationId,
   };
 }
 
 function addInnerMsg(msg: messageType) {
   return {
-    id: msg.id,
-    created_at: msg.created_at,
-    message_type: msg.message_type,
-    file_links: msg.file_links,
+    id: msg._id,
+    created_at: msg.createdAt,
+    message_type: msg.fileType,
+    file_links: msg.fileLink,
     status: msg.status,
-    seen_by: msg.seen_by,
-    message_text: msg.message_text,
+    seen_by: msg.seenBy,
+    message_text: msg.message,
   };
 }

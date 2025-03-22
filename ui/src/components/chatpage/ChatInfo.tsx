@@ -2,12 +2,7 @@ import { ArrowIcon, BlockIocn, CrossIcon, HelpIcon, MuteIcon } from "../Icons";
 import Profile from "../modal/Profile";
 import ProfilePic from "../ProfilePic";
 import useRoomFriendQuery from "../../queryHooks/useRoomFriendQuery";
-import useBlockUserMutation, {
-  useUnBlockUserMutation,
-} from "../../queryHooks/useBlockUserMutation";
 import { notifyPromise } from "../toast/MsgToast";
-import { useMemo } from "react";
-import { useUserStore } from "../../store/userStore";
 
 type Props = {
   friendUsers: ReturnType<typeof useRoomFriendQuery>;
@@ -15,15 +10,17 @@ type Props = {
 };
 
 export default function ChatInfo({ friendUsers, setIsChatInfoOpen }: Props) {
-  const { user } = useUserStore();
-  const blockUserMutation = useBlockUserMutation();
-  const unBlockUserMutation = useUnBlockUserMutation();
-  const isBlocked = useMemo(
-    () =>
-      user?.blocked_user?.find((user) => user.id === friendUsers.data?.id) !==
-      undefined,
-    [friendUsers.data?.id, user?.blocked_user]
-  );
+  const blockUserMutation = {
+    mutateAsync: async (id: number) => {
+      console.log(id);
+    },
+  };
+  const unBlockUserMutation = {
+    mutateAsync: async (id: number) => {
+      console.log(id);
+    },
+  };
+  const isBlocked = false;
   return (
     <div className="flex flex-col h-full gap-[40px] bg-third">
       <div className="flex px-[40px] min-h-[92px] bg-second items-center justify-between">

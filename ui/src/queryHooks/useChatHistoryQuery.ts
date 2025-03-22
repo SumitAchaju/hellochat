@@ -1,17 +1,16 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useAxios from "../hooks/useAxios";
 import { chatHistoryType, messageType } from "../types/fetchTypes";
-import { roomUrl } from "../utils/apiurl";
 
 const KEY = ["chatHistory"];
 
 export default function useChatHistoryQuery() {
-  const api = useAxios(true);
+  const api = useAxios();
   const { data, isSuccess, isLoading, isError, error } = useQuery({
     queryKey: KEY,
     queryFn: async () => {
-      const fetch = await api.get(roomUrl.chatHistory);
-      return fetch.data;
+      const history = await api.get("/express/api/v1/conversation/history/");
+      return history.data;
     },
   });
 

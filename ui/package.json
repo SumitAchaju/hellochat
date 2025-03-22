@@ -24,6 +24,7 @@
     "react-router-dom": "^6.22.2",
     "react-use-websocket": "^4.10.0",
     "reactjs-popup": "^2.0.6",
+    "socket.io-client": "^4.8.1",
     "swiper": "^11.1.5",
     "use-debounce": "^10.0.3",
     "zustand": "^5.0.3"
@@ -33,6 +34,7 @@
     "@types/node": "^22.1.0",
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",
+    "@types/socket.io-client": "^1.4.36",
     "@typescript-eslint/eslint-plugin": "^7.0.2",
     "@typescript-eslint/parser": "^7.0.2",
     "@vitejs/plugin-react": "^4.2.1",

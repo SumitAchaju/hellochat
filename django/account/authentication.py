@@ -15,10 +15,9 @@ class JWTAuthenticationBothMethods(JWTAuthentication):
 
         # Try to get token from cookie
         raw_token = self.get_raw_token_from_cookie(request)
+        print(raw_token)
         if raw_token is None:
-            raise AuthenticationFailed(
-                _("Authentication credentials were not provided.")
-            )
+            return None
 
         validated_token = self.get_validated_token(raw_token)
 

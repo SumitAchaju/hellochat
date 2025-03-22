@@ -1,4 +1,3 @@
-import logger from "./utils/logger.js";
 import { createClient } from "redis";
 
 const redisClient = createClient({
@@ -11,10 +10,10 @@ const redisClient = createClient({
 });
 
 redisClient.on("error", (error) => {
-  logger.error("Redis connection error", error);
+  console.log("Redis connection error", error);
 });
 redisClient.on("connect", () => {
-  logger.info("Redis connected");
+  console.log("Redis connected");
 });
 
 export default redisClient;

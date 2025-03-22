@@ -43,3 +43,18 @@ class CustomUserAdmin(UserAdmin):
     )
     search_fields = ("username", "email", "contact_number")
     ordering = ("-date_joined",)
+
+    def get_fieldsets(self, request, obj=...):
+        return super().get_fieldsets(request, obj) + (
+            (
+                "additional info",
+                {
+                    "fields": (
+                        "address",
+                        "profile",
+                        "contact_number_country_code",
+                        "contact_number",
+                    )
+                },
+            ),
+        )

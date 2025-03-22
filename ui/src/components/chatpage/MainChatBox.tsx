@@ -9,7 +9,6 @@ import Message from "../Message";
 import MessageBox from "../MessageBox";
 import ProfilePic from "../ProfilePic";
 import { useParams } from "react-router-dom";
-import { processMsgType } from "../../utils/processMsg";
 import { checkTimeDiff, formatedDate } from "../../utils/processDate";
 import useRoomFriendQuery from "../../queryHooks/useRoomFriendQuery";
 import useMsgQuery from "../../queryHooks/useMsgQuery";
@@ -38,9 +37,26 @@ export default function MainChatBox({}: Props) {
 
   const { ref, inView } = useInView();
 
-  const friendUsers = useRoomFriendQuery(roomId);
-  const chatMessages = useMsgQuery(roomId);
-  const roomQuery = useRoomQuery(roomId);
+  const friendUsers = {
+    data: { profile: "" },
+    isLoading: false,
+    isError: false,
+    error: { response: { data: { detail: "" } } },
+  };
+  const chatMessages = {
+    data: [],
+    isLoading: false,
+    isError: false,
+    isFetching: false,
+    hasNextPage: false,
+    orderedChatMessages: [],
+  };
+  const roomQuery = {
+    data: { is_active: false },
+    isLoading: false,
+    isError: false,
+    isFetching: false,
+  };
 
   const { lastStatusMsg } = useShowMsgStatus(chatMessages.orderedChatMessages);
 
@@ -142,7 +158,7 @@ export default function MainChatBox({}: Props) {
                 </div>
               )}
               {chatMessages.orderedChatMessages?.map(
-                (m: processMsgType, index: number) => {
+                (m: any, index: number) => {
                   if (index == 0) {
                     prevDate = m.message[0].created_at;
                   }
@@ -168,7 +184,7 @@ export default function MainChatBox({}: Props) {
                         inViewRef={index === 0 ? ref : undefined}
                         img={
                           m.sender_id == user?.id
-                            ? user.profile
+                            ? user?.profile
                             : friendUsers.data?.profile
                         }
                         type={m.sender_id == user?.id ? "sent" : "recieved"}
